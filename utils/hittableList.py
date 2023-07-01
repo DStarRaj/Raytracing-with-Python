@@ -1,4 +1,4 @@
-from .hittable import HitRecord, Hittable
+from .hittable import HitRecord, Hittable, copyHitRecord
 from .ray import Ray
 
 
@@ -24,13 +24,6 @@ class HittableList(Hittable):
             if object.hit(r, t_min, closest_so_far, temp_rec):
                 hit_anything = True
                 closest_so_far = temp_rec.t
-                copy_HitRecord(temp_rec, rec)
+                copyHitRecord(rec, temp_rec)
 
         return hit_anything
-
-
-def copy_HitRecord(source, dest):
-    dest.p = source.p
-    dest.normal = source.normal
-    dest.t = source.t
-    dest.front_face = source.front_face

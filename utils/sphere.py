@@ -2,13 +2,15 @@ from .point import Point
 from .vector import Vector
 from .ray import Ray
 from .hittable import HitRecord, Hittable
+from .material import Material
 
 
 class Sphere(Hittable):
-    def __init__(self, center: Point, radius: float) -> None:
+    def __init__(self, center: Point, radius: float, material: Material) -> None:
         super().__init__()
         self._center = center
         self._radius = radius
+        self._mat_ptr = material
 
     @property
     def center(self) -> Point:
@@ -25,6 +27,14 @@ class Sphere(Hittable):
     @radius.setter
     def radius(self, r: float) -> None:
         self._radius = r
+
+    @property
+    def mat_ptr(self) -> Material:
+        return self._mat_ptr
+
+    @mat_ptr.setter
+    def mat_ptr(self, m: Material) -> None:
+        self._mat_ptr = m
 
     def hit(self, r: Ray, t_min: float, t_max: float, rec: HitRecord) -> bool:
         oc: Vector = r.origin - self.center
@@ -45,5 +55,6 @@ class Sphere(Hittable):
         rec.p = r.at(rec.t)
         outward_normal: Vector = (rec.p - self.center) / self.radius
         rec.set_face_normal(r, outward_normal)
+        rec.mat_ptr = self.mat_ptr
 
         return True

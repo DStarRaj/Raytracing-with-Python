@@ -7,6 +7,7 @@ from utils.hittable import HitRecord
 from utils.hittableList import HittableList
 from utils.sphere import Sphere
 from utils.camera import Camera
+from utils.material import Lambertian, Metal
 from typing import Type
 from utils.utilities import *
 
@@ -30,8 +31,11 @@ def ray_color(r: Ray, world: HittableList, depth: int) -> Color:
         return Color(0, 0, 0)
 
     if world.hit(r, 0.001, INFINITY, rec):
-        target: Point = rec.p + rec.normal + random_in_hemisphere(rec.normal)
-        return 0.5 * ray_color(Ray(rec.p, target - rec.p), world, depth - 1)
+        scattered: Ray = Ray()
+        attenuation: Color = Color()
+        if rec.mat_ptr.scatter(r, rec, attenuation, scattered):
+            return attenuation * ray_color(scattered, world, depth - 1)
+        return Color(0, 0, 0)
 
     unit_direction: Vector = r.direction.unit
     t: float = 0.5 * (unit_direction.y + 1)
@@ -43,13 +47,22 @@ def main() -> None:
     aspect_ratio: float = 16 / 9
     image_width: int = 400
     image_height: int = int(image_width / aspect_ratio)
-    samples_per_pixel: int = 10
+    samples_per_pixel: int = 20
     max_depth: int = 50
 
     ## World
     world: HittableList = HittableList()
-    world.add(Sphere(Point(0, 0, -1), 0.5))
-    world.add(Sphere(Point(0, -100.5, -1), 100))
+
+    material_ground: Lambertian = Lambertian(Color(0.8, 0.8, 0))
+    material_center: Lambertian = Lambertian(Color(0.7, 0.3, 0.3))
+    # material_center = Metal(Color(1, 0, 0))
+    material_left: Metal = Metal(Color(0.8, 0.8, 0.8), 0.3)
+    material_right: Metal = Metal(Color(0.8, 0.6, 0.2), 1)
+
+    world.add(Sphere(Point(0, -100.5, -1), 100, material_ground))
+    world.add(Sphere(Point(0, 0, -1), 0.5, material_center))
+    world.add(Sphere(Point(-1, 0, -1), 0.5, material_left))
+    world.add(Sphere(Point(1, 0, -1), 0.5, material_right))
 
     ## Camera
     cam: Camera = Camera()
