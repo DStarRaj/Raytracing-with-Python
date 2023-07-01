@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "Raytracing-with-Python"
+version = "0.1.0"
+description = ""
+authors = ["Samrat Dutta"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pillow = "^9.5.0"
+typing-extensions = "^4.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
