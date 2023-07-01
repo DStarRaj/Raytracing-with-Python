@@ -1,6 +1,8 @@
 from typing import Type
 from .color import Color
 from PIL import Image
+from .utilities import clamp
+
 
 class WImage:
     data = []
@@ -10,12 +12,22 @@ class WImage:
         self.width = width
         self.image_path = image_path
 
-    def add_data_array(self, data: Type[Color]) -> None:
+    def add_data_array(self, pixel_color: Type[Color], samples_per_pixel: int) -> None:
+        r = pixel_color.x
+        g = pixel_color.y
+        b = pixel_color.z
+
+        scale = 1 / samples_per_pixel
+
+        r = (scale * r) ** 0.5
+        g = (scale * g) ** 0.5
+        b = (scale * b) ** 0.5
+
         self.data.append(
             (
-                int(data.x * 255.999),
-                int(data.y * 255.999),
-                int(data.z * 255.999)
+                int(256 * clamp(r, 0, 0.999)),
+                int(256 * clamp(g, 0, 0.999)),
+                int(256 * clamp(b, 0, 0.999)),
             )
         )
 
@@ -29,6 +41,7 @@ class WImage:
                 pixel_map[j, i] = d
         image.save("output.png", format="png")
 
+
 def test():
     image_width: int = 1000
     image_height: int = 1000
@@ -37,9 +50,9 @@ def test():
 
     j: int = image_height - 1
     count = 0
-    while( j >= 0 ):
+    while j >= 0:
         i: int = 0
-        while(i < image_width):
+        while i < image_width:
             r: float = i / (image_width - 1)
             g: float = j / (image_height - 1)
             b: float = 0.5
@@ -50,13 +63,14 @@ def test():
 
             color = Color(ir, ig, ib)
             image.add_data_array(color)
-            count+=1
+            count += 1
             i += 1
         j -= 1
 
     print(count)
 
     image.write_image()
+
 
 if __name__ == "__main__":
     test()

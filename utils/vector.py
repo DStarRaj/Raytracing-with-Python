@@ -1,5 +1,6 @@
 from typing import Type
 from typing_extensions import Self
+from .utilities import random_double
 
 
 class Vector:
@@ -51,6 +52,14 @@ class Vector:
 
     def cross(self, vec: Self) -> Self:
         return cross_product(self, vec)
+
+    @staticmethod
+    def random(min: float = None, max: float = None) -> Self:
+        return Vector(
+            random_double(min, max),
+            random_double(min, max),
+            random_double(min, max),
+        )
 
     def __add__(self, vec: Self) -> Self:
         if isinstance(vec, Vector):
@@ -141,6 +150,26 @@ def unit_vector(vec: Type[Vector]) -> Vector:
         return vec / vec.length
     else:
         raise TypeError(f"Type of '{type(vec).__qualname__}' isn't supported")
+
+
+def random_in_unit_sphere() -> Vector:
+    while True:
+        p: Vector = Vector.random(-1, 1)
+        if p.length_sq >= 1:
+            continue
+        return p
+
+
+def random_unit_vector() -> Vector:
+    return random_in_unit_sphere().unit
+
+
+def random_in_hemisphere(normal: Vector) -> Vector:
+    in_unit_sphere: Vector = random_in_unit_sphere()
+    if in_unit_sphere.dot(normal) > 0:
+        return in_unit_sphere
+    else:
+        return -in_unit_sphere
 
 
 if __name__ == "__main__":
