@@ -3,6 +3,7 @@ from .vector import Vector
 from .ray import Ray
 from .hittable import HitRecord, Hittable
 from .material import Material
+from .interval import Interval
 
 
 class Sphere(Hittable):
@@ -36,7 +37,7 @@ class Sphere(Hittable):
     def mat_ptr(self, m: Material) -> None:
         self._mat_ptr = m
 
-    def hit(self, r: Ray, t_min: float, t_max: float, rec: HitRecord) -> bool:
+    def hit(self, r: Ray, ray_t: Interval, rec: HitRecord) -> bool:
         oc: Vector = r.origin - self.center
         a: float = r.direction.length_sq
         half_b: float = oc.dot(r.direction)
@@ -46,9 +47,9 @@ class Sphere(Hittable):
             return False
         sqrtd: float = discriminant**0.5
         root: float = (-half_b - sqrtd) / a
-        if root < t_min or t_max < root:
+        if not ray_t.surrounds(root):
             root: float = (-half_b + sqrtd) / a
-            if root < t_min or t_max < root:
+            if not ray_t.surrounds(root):
                 return False
 
         rec.t = root

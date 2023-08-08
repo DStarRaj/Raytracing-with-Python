@@ -163,6 +163,14 @@ def random_in_unit_sphere() -> Vector:
         return p
 
 
+def random_on_hemisphere(normal: Vector) -> Vector:
+    on_unit_sphere: Vector = random_unit_vector()
+    if dot_product(on_unit_sphere, normal) > 0.0:
+        return on_unit_sphere
+    else:
+        return -on_unit_sphere
+
+
 def random_unit_vector() -> Vector:
     return random_in_unit_sphere().unit
 
