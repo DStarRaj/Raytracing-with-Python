@@ -1,6 +1,7 @@
 from typing import Type
 from typing_extensions import Self
 from .utilities import random_double
+from math import sqrt
 
 
 class Vector:
@@ -176,6 +177,13 @@ def random_in_hemisphere(normal: Vector) -> Vector:
 
 def reflect(v: Vector, n: Vector) -> Vector:
     return v - 2 * v.dot(n) * n
+
+
+def refract(uv: Vector, n: Vector, etai_over_etat: float) -> Vector:
+    cos_theta: float = min(dot_product(-uv, n), 1.0)
+    r_out_perp: Vector = etai_over_etat * (uv + cos_theta * n)
+    r_out_parallel: Vector = -sqrt(abs(1.0 - r_out_perp.length_sq)) * n
+    return r_out_perp + r_out_parallel
 
 
 if __name__ == "__main__":
