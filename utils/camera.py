@@ -5,7 +5,8 @@ from .hittable import Hittable, HitRecord
 from .color import Color
 from .interval import Interval, INFINITY
 from .image import WImage
-from .utilities import random_double
+from .utilities import random_double, degrees_to_radians
+from math import tan
 
 
 class Camera:
@@ -16,22 +17,36 @@ class Camera:
     pixel00_loc: Point
     pixel_delta_u: Vector
     pixel_delta_v: Vector
+    u: Vector
+    v: Vector
+    w: Vector
     samples_per_pixel: int = 10
     max_depth: int = 10
+    vfov: float = 90
+    lookfrom: Point = Point(0, 0, -1)
+    lookat: Point = Point(0, 0, 0)
+    vup: Vector = Vector(0, 1, 0)
 
     def initialize(self) -> None:
         self.image_height: int = int(self.image_width / self.aspect_ratio)
         self.image_height = 1 if self.image_height < 1 else self.image_height
-        self.center = Point(0, 0, 0)
+        self.center = self.lookfrom
 
         # Determine viewport dimensions.
-        focal_length: float = 1.0
-        viewport_height: float = 2.0
+        focal_length: float = (self.lookfrom - self.lookat).length
+        theta: float = degrees_to_radians(self.vfov)
+        h = tan(theta / 2)
+        viewport_height: float = 2 * h * focal_length
         viewport_width: float = viewport_height * (self.image_width / self.image_height)
 
+        # Calculate the u,v,w unit basis vectors for the camera coordinate frame.
+        self.w = (self.lookfrom - self.lookat).unit
+        self.u = self.vup.cross(self.w).unit
+        self.v = self.w.cross(self.u)
+
         # Calculate the vectors across the horizontal and down the vertical viewport edges.
-        viewport_u: Vector = Vector(viewport_width, 0, 0)
-        viewport_v: Vector = Vector(0, -viewport_height, 0)
+        viewport_u: Vector = viewport_width * self.u
+        viewport_v: Vector = viewport_height * -self.v
 
         # Calculate the horizontal and vertical delta vectors from pixel to pixel.
         self.pixel_delta_u = viewport_u / self.image_width
@@ -39,7 +54,7 @@ class Camera:
 
         # Calculate the location of the upper left pixel.
         viewport_upper_left: Point = (
-            self.center - Vector(0, 0, focal_length) - viewport_u / 2 - viewport_v / 2
+            self.center - (focal_length * self.w) - viewport_u / 2 - viewport_v / 2
         )
         self.pixel00_loc = viewport_upper_left + 0.5 * (
             self.pixel_delta_u + self.pixel_delta_v
