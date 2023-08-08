@@ -1,5 +1,5 @@
 from .point import Point
-from .vector import Vector
+from .vector import Vector, random_in_unit_disk
 from .ray import Ray
 from .hittable import Hittable, HitRecord
 from .color import Color
@@ -20,12 +20,16 @@ class Camera:
     u: Vector
     v: Vector
     w: Vector
+    defocus_disk_u: Vector
+    defocus_disk_v: Vector
     samples_per_pixel: int = 10
     max_depth: int = 10
     vfov: float = 90
     lookfrom: Point = Point(0, 0, -1)
     lookat: Point = Point(0, 0, 0)
     vup: Vector = Vector(0, 1, 0)
+    defocus_angle: float = 0
+    focus_dist: float = 10
 
     def initialize(self) -> None:
         self.image_height: int = int(self.image_width / self.aspect_ratio)
@@ -33,10 +37,10 @@ class Camera:
         self.center = self.lookfrom
 
         # Determine viewport dimensions.
-        focal_length: float = (self.lookfrom - self.lookat).length
+        # focal_length: float = (self.lookfrom - self.lookat).length
         theta: float = degrees_to_radians(self.vfov)
         h = tan(theta / 2)
-        viewport_height: float = 2 * h * focal_length
+        viewport_height = 2 * h * self.focus_dist
         viewport_width: float = viewport_height * (self.image_width / self.image_height)
 
         # Calculate the u,v,w unit basis vectors for the camera coordinate frame.
@@ -54,11 +58,18 @@ class Camera:
 
         # Calculate the location of the upper left pixel.
         viewport_upper_left: Point = (
-            self.center - (focal_length * self.w) - viewport_u / 2 - viewport_v / 2
+            self.center - (self.focus_dist * self.w) - viewport_u / 2 - viewport_v / 2
         )
         self.pixel00_loc = viewport_upper_left + 0.5 * (
             self.pixel_delta_u + self.pixel_delta_v
         )
+
+        # Calculate the camera defocus disk basis vectors.
+        defocus_radius = self.focus_dist * tan(
+            degrees_to_radians(self.defocus_angle / 2)
+        )
+        self.defocus_disk_u = self.u * defocus_radius
+        self.defocus_disk_v = self.v * defocus_radius
 
     def render(self, world: Hittable) -> None:
         self.initialize()
@@ -96,7 +107,9 @@ class Camera:
             self.pixel00_loc + (i * self.pixel_delta_u) + (j * self.pixel_delta_v)
         )
         pixel_sample = pixel_center + self.pixel_sample_square()
-        ray_origin = self.center
+        ray_origin = (
+            self.center if (self.defocus_angle <= 0) else self.defocus_disk_sample()
+        )
         ray_direction = pixel_sample - ray_origin
 
         return Ray(ray_origin, ray_direction)
@@ -105,3 +118,7 @@ class Camera:
         px = -0.5 + random_double()
         py = -0.5 + random_double()
         return (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
+
+    def defocus_disk_sample(self) -> Point:
+        p: Vector = random_in_unit_disk()
+        return self.center + (p.x * self.defocus_disk_u) + (p.y * self.defocus_disk_v)

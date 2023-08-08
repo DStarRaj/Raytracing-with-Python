@@ -148,11 +148,18 @@ def cross_product(vecA: Type[Vector], vecB: Type[Vector]) -> Type[Vector]:
         )
 
 
-def unit_vector(vec: Type[Vector]) -> Vector:
+def unit_vector(vec: Vector) -> Vector:
     if isinstance(vec, Vector):
         return vec / vec.length
     else:
         raise TypeError(f"Type of '{type(vec).__qualname__}' isn't supported")
+
+
+def random_in_unit_disk() -> Vector:
+    while True:
+        p: Vector = Vector(random_double(-1, 1), random_double(-1, 1), 0)
+        if p.length_sq < 1:
+            return p
 
 
 def random_in_unit_sphere() -> Vector:
