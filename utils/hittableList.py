@@ -28,3 +28,6 @@ class HittableList(Hittable):
                 copyHitRecord(rec, temp_rec)
 
         return hit_anything
+
+    def __str__(self) -> str:
+        return f"Items in List {len(self.objects)}"

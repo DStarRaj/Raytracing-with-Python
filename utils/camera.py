@@ -2,6 +2,7 @@ from .point import Point
 from .vector import Vector, random_in_unit_disk
 from .ray import Ray
 from .hittable import Hittable, HitRecord
+from .hittableList import HittableList
 from .color import Color
 from .interval import Interval, INFINITY
 from .image import WImage
@@ -71,9 +72,9 @@ class Camera:
         self.defocus_disk_u = self.u * defocus_radius
         self.defocus_disk_v = self.v * defocus_radius
 
-    def render(self, world: Hittable) -> None:
+    def render(self, world: HittableList) -> None:
         self.initialize()
-        image = WImage(self.image_width, self.image_height, "image_test.ppm")
+        image = WImage(self.image_width, self.image_height, "image_test")
         j: int = 0
         while j < self.image_height:
             print(f"Scanlines Remaning: {self.image_height - j}")
@@ -88,7 +89,7 @@ class Camera:
             j += 1
         image.write_image()
 
-    def ray_color(self, r: Ray, depth: int, world: Hittable) -> Color:
+    def ray_color(self, r: Ray, depth: int, world: HittableList) -> Color:
         rec: HitRecord = HitRecord()
         if depth <= 0:
             return Color(0, 0, 0)
@@ -111,7 +112,6 @@ class Camera:
             self.center if (self.defocus_angle <= 0) else self.defocus_disk_sample()
         )
         ray_direction = pixel_sample - ray_origin
-
         return Ray(ray_origin, ray_direction)
 
     def pixel_sample_square(self) -> Vector:

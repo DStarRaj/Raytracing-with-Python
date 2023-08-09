@@ -10,7 +10,7 @@ class WImage:
     def __init__(self, width: int, height: int, image_path: str) -> None:
         self.height = height
         self.width = width
-        self.image_path = image_path
+        self.image_path = image_path + ".png"
 
     def add_data_array(self, pixel_color: Type[Color], samples_per_pixel: int) -> None:
         r = pixel_color.x
@@ -39,38 +39,4 @@ class WImage:
             for j in range(self.width):
                 d = next(data_itr)
                 pixel_map[j, i] = d
-        image.save("output.png", format="png")
-
-
-def test():
-    image_width: int = 1000
-    image_height: int = 1000
-
-    image = WImage(image_width, image_height, "image_test.ppm")
-
-    j: int = image_height - 1
-    count = 0
-    while j >= 0:
-        i: int = 0
-        while i < image_width:
-            r: float = i / (image_width - 1)
-            g: float = j / (image_height - 1)
-            b: float = 0.5
-
-            ir: int = int(255.999 * r)
-            ig: int = int(255.999 * g)
-            ib: int = int(255.999 * b)
-
-            color = Color(ir, ig, ib)
-            image.add_data_array(color)
-            count += 1
-            i += 1
-        j -= 1
-
-    print(count)
-
-    image.write_image()
-
-
-if __name__ == "__main__":
-    test()
+        image.save(self.image_path, format="png")
