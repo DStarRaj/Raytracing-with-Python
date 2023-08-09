@@ -1,6 +1,6 @@
 # Raytracing-with-Python
 
-This project was created while studing about [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html), where I was intereset to implement the whole idea in Python and see how it looks.
+This project was created while studing about [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html), where I was interested to implement the whole idea in Python and see how it looks.
 
 Due to CPU limitations the output is noisy, and the multiprocess isn't implemented yet.
 
